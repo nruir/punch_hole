@@ -129,29 +129,50 @@ const MapModal = ({ onClose }) => {
   useEffect(() => {
     const initMap = () => {
       if (!window.google) return;
-      const gungdong = { lat: 36.3622, lng: 127.3500 }; // 궁동 좌표
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: gungdong,
-        zoom: 14,
-        disableDefaultUI: true,
-      });
 
-      new window.google.maps.Marker({
-        position: gungdong,
-        map: map,
-        title: "내 위치 (궁동)",
-      });
+      const renderMap = (location, title) => {
+        const map = new window.google.maps.Map(mapRef.current, {
+          center: location,
+          zoom: 14,
+          disableDefaultUI: true,
+        });
 
-      new window.google.maps.Circle({
-        strokeColor: "#10b981",
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: "#10b981",
-        fillOpacity: 0.35,
-        map,
-        center: gungdong,
-        radius: 1000, // 1km 반경
-      });
+        new window.google.maps.Marker({
+          position: location,
+          map: map,
+          title: title,
+        });
+
+        new window.google.maps.Circle({
+          strokeColor: "#10b981",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#10b981",
+          fillOpacity: 0.35,
+          map,
+          center: location,
+          radius: 1000, // 1km 반경
+        });
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            renderMap(userLocation, "현재 내 위치");
+          },
+          () => {
+            // Geolocation failed or denied, fallback to Gungdong
+            renderMap({ lat: 36.3622, lng: 127.3500 }, "내 위치 (궁동)");
+          }
+        );
+      } else {
+        // Geolocation not supported, fallback to Gungdong
+        renderMap({ lat: 36.3622, lng: 127.3500 }, "내 위치 (궁동)");
+      }
     };
 
     if (!window.google) {
