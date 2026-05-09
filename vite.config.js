@@ -38,6 +38,7 @@ const jsonDbPlugin = () => ({
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/punch_hole/',
   plugins: [
     tailwindcss(),
     react(),
