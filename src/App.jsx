@@ -427,6 +427,11 @@ export default function App() {
               exit={{ opacity: 0, scale: 0.9 }}
               className="w-full flex flex-col items-center"
             >
+              <div className="w-full flex justify-start mb-4">
+                <button onClick={() => { setInputTexts(['']); setView('landing'); }} className="text-slate-500 hover:text-slate-800 flex items-center bg-white border border-slate-300 shadow-sm px-4 py-2 rounded-full font-bold">
+                  <ArrowLeft className="w-5 h-5 mr-2" /> 뒤로 가기
+                </button>
+              </div>
               <div className="w-full bg-[#f8f4e6] text-[#1f2937] p-8 receipt-edge receipt-edge-top noise-bg shadow-2xl relative px-12 sm:px-16">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold mb-1">"{nickname}"의 감정 영수증</h2>
@@ -479,24 +484,7 @@ export default function App() {
                   내용을 추가하면 AI가 맞춤형 영수증과 문구를 생성합니다.
                 </div>
 
-                {/* Inside Receipt Buttons */}
-                <div className="w-full flex space-x-3 mt-8">
-                  <button
-                    onClick={() => { setInputTexts(['']); setView('landing'); }}
-                    disabled={isProcessing}
-                    className="flex-1 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors flex items-center justify-center font-bold"
-                  >
-                    <X className="w-4 h-4 mr-1" /> 내용 취소
-                  </button>
-                  <button
-                    onClick={() => alert("영수증 작성 완료 후 공유가 가능합니다.")}
-                    disabled={isProcessing}
-                    className="flex-1 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors flex items-center justify-center font-bold"
-                  >
-                    <Share2 className="w-4 h-4 mr-1" /> 공유
-                  </button>
-                </div>
-                
+                {/* Removed bottom cancel/share buttons */}
                 <button
                   onClick={handleCreateReceipt}
                   disabled={isProcessing || !inputTexts.some(t => t.trim() !== '')}
@@ -674,10 +662,34 @@ export default function App() {
                   <p className="text-base">"{selectedFeedItem.ad_copy || selectedFeedItem.ad}"</p>
                 </div>
                 
-                {/* Interactive Hint */}
+                {/* Interactive Hint & Share Button */}
                 {selectedFeedItem.nickname === nickname ? (
-                  <div className="mt-8 text-center text-sm font-bold text-rose-500/80">
-                    내 영수증에는 공감(펀치홀)을 남길 수 없습니다.
+                  <div className="mt-8 flex flex-col items-center space-y-4 z-50">
+                    <div className="text-center text-sm font-bold text-rose-500/80">
+                      내 영수증에는 공감(펀치홀)을 남길 수 없습니다.
+                    </div>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (navigator.share) {
+                          try {
+                            await navigator.share({
+                              title: '나의 감정 영수증',
+                              text: `제 감정 영수증 보실래요?\n\n"${selectedFeedItem.raw_text}"\n합계: ${selectedFeedItem.total}ⓟ`,
+                              url: window.location.href,
+                            });
+                          } catch (error) {
+                            console.log('Error sharing', error);
+                          }
+                        } else {
+                          alert('이 브라우저에서는 공유 기능이 지원되지 않습니다.');
+                        }
+                      }}
+                      className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-full font-bold shadow-lg hover:bg-indigo-700 transition-transform active:scale-95 cursor-pointer"
+                    >
+                      <Share2 className="w-5 h-5 mr-2" />
+                      SNS에 공유하기
+                    </button>
                   </div>
                 ) : (
                   <div className="mt-8 text-center text-sm font-bold text-indigo-600/80 animate-pulse">
